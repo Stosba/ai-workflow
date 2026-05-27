@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "command": {
+    "workflow": {
+      "description": "Pipeline séquentiel complet : Plan → Build → Test → Review → Commit",
+      "template": "Lance le workflow séquentiel suivant pour la tâche décrite. Chaque étape attend la fin de la précédente.\n\nTÂCHE : $ARGUMENTS\n\nÉTAPE 1 — PLAN\n@plan analyse le codebase et produit le plan de tâches pour : $ARGUMENTS\n\nÉTAPE 2 — IMPLÉMENTATION (après que @plan a terminé)\n@build implémente le plan produit à l'étape précédente\n\nÉTAPE 3 — TESTS (après \"IMPLÉMENTATION TERMINÉE\")\n@test écrit et exécute les tests pour le code produit\n\nÉTAPE 4 — REVUE (après \"TESTS OK\")\n@review analyse le diff complet et produit son rapport\n\nÉTAPE 5 — COMMIT (après \"REVUE OK\")\nCrée un commit avec un message conventionnel résumant les changements, puis ouvre une draft PR."
+    }
+  },
+  "agent": {
+    "plan": { "description": "Analyse le codebase et découpe une tâche en sous-tâches" },
+    "build": { "description": "Implémente le code selon un plan fourni" },
+    "test": { "description": "Écrit les tests correspondant à l'implémentation" },
+    "review": { "description": "Analyse le diff final, lint et revue qualité" }
+  }
+}
