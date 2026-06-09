@@ -1,15 +1,18 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "instructions": ["AGENTS.md"],
   "command": {
     "workflow": {
-      "description": "Pipeline séquentiel complet : Plan → Build → Test → Review → Commit",
-      "template": "Lance le workflow séquentiel suivant pour la tâche décrite. Chaque étape attend la fin de la précédente.\n\nTÂCHE : $ARGUMENTS\n\nÉTAPE 1 — PLAN\n@plan analyse le codebase et produit le plan de tâches pour : $ARGUMENTS\n\nÉTAPE 2 — IMPLÉMENTATION (après que @plan a terminé)\n@build implémente le plan produit à l'étape précédente\n\nÉTAPE 3 — TESTS (après \"IMPLÉMENTATION TERMINÉE\")\n@test écrit et exécute les tests pour le code produit\n\nÉTAPE 4 — REVUE (après \"TESTS OK\")\n@review analyse le diff complet et produit son rapport\n\nÉTAPE 5 — COMMIT (après \"REVUE OK\")\nCrée un commit avec un message conventionnel résumant les changements, puis ouvre une draft PR."
+      "description": "Pipeline séquentiel complet : Plan → Build → Test → Dogfood → Review → ADR → Commit",
+      "template": "Lance le workflow séquentiel suivant pour la tâche décrite. Chaque étape attend la fin de la précédente.\n\nTÂCHE : $ARGUMENTS\n\nÉTAPE 1 — PLAN\n@plan analyse le codebase (docs/adr/ inclus) et produit le plan de tâches pour : $ARGUMENTS. Respecte AGENTS.md : fichiers disjoints = tâches séparées, même module = une tâche.\n\nÉTAPE 2 — IMPLÉMENTATION (après que @plan a terminé)\n@build implémente le plan produit à l'étape précédente\n\nÉTAPE 3 — TESTS (après \"IMPLÉMENTATION TERMINÉE\")\n@test écrit et exécute les tests pour le code produit\n\nÉTAPE 4 — DOGFOOD (après \"TESTS OK\")\n@dogfood teste la surface publique comme un utilisateur final. Si FAIL, revenir à l'étape 2 pour correction (max 2 cycles).\n\nÉTAPE 5 — REVUE (après \"DOGFOOD OK\")\n@review analyse le diff complet et produit son rapport. Si une décision structurante a été prise, délègue à @adr.\n\nÉTAPE 6 — COMMIT (après \"REVUE OK\")\nCrée un commit avec un message conventionnel résumant les changements, puis ouvre une draft PR."
     }
   },
   "agent": {
-    "plan": { "description": "Analyse le codebase et découpe une tâche en sous-tâches" },
+    "plan": { "description": "Analyse le codebase et découpe une tâche en sous-tâches (respecte AGENTS.md : fichiers disjoints → séparés, même module → groupé)" },
     "build": { "description": "Implémente le code selon un plan fourni" },
     "test": { "description": "Écrit les tests correspondant à l'implémentation" },
-    "review": { "description": "Analyse le diff final, lint et revue qualité" }
+    "dogfood": { "description": "Teste la surface publique comme un utilisateur final, sans accès au code source" },
+    "review": { "description": "Analyse le diff final, lint et revue qualité. Délègue à @adr si décision structurante" },
+    "adr": { "description": "Rédige une ADR pour documenter une décision architecturale" }
   }
 }
